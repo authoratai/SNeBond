@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <active>true</active>
+        <api_name>x_flr_snebond.eBondUtils</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>eBondUtils</name>
+        <script><![CDATA[var eBondUtils = Class.create();
+eBondUtils.prototype = {
+	initialize: function() {
+	},
+
+	getLatestComment: function(incident_sys_id) {
+		var grComm = new GlideRecord('sys_journal_field');
+		grComm.addQuery('element_id', incident_sys_id);
+		grComm.addQuery('name', 'incident');
+		grComm.addQuery('element', 'comments');
+		grComm.orderByDesc('sys_created_on');
+		grComm.setLimit(1);
+		grComm.query();
+		if (grComm.next()) {
+			var commDate = grComm.sys_created_on.toString();
+			var commBy = grComm.sys_created_by.toString();
+			var commTxt = grComm.value.toString();
+		}
+		var comment = commDate + ' - ' + commBy + ' (Additional Comments) ' + commTxt;
+		return comment;
+	},
+
+	getLatestWorkNote: function(incident_sys_id) {
+		var grNote = new GlideRecord('sys_journal_field');
+		grNote.addQuery('element_id', incident_sys_id);
+		grNote.addQuery('name', 'incident');
+		grNote.addQuery('element', 'work_notes');
+		grNote.orderByDesc('sys_created_on');
+		grNote.setLimit(1);
+		grNote.query();
+		if (grNote.next()) {
+			var noteDate = grNote.sys_created_on.toString();
+			var noteBy = grNote.sys_created_by.toString();
+			var noteTxt = grNote.value.toString();
+		}
+		var workNote = noteDate + ' - ' + noteBy + ' (Work notes) ' + noteTxt;
+		return workNote;
+	},
+
+	createLocalIncident: function(restBody) {
+		var body = JSON.parse(restBody);
+		var response = {};
+		var grImpSet = new GlideRecord('x_441625_inc_ebond_incident');
+		grImpSet.initialize();
+		grImpSet.u_short_description = restBody.short_description;
+		grImpSet.u_priority = restBody.priority;
+		grImpSet.u_correlation_id = restBody.correlation_id;
+		grImpSet.u_assignment_group = restBody.assignment_group;
+		grImpSet.u_contact_type = restBody.contact_type;
+		grImpSet.u_configuration_item = restBody.configuration_item;
+		grImpSet.u_affected_date = restBody.affected_date; 
+		grImpSet.u_work_notes = restBody.work_notes;
+		var id = grImpSet.insert();
+		var grImpResult = new GlideRecord('x_441625_inc_ebond_incident');
+		grImpResult.get(id);
+		var inc = grImpResult.sys_target_sys_id;
+		var grInc = new GlideRecord('incident');
+		grInc.addQuery('sys_id', inc);
+		grInc.query();
+		if (grInc.next()) {
+			response.transaction_status = 'success';
+			response.number = grInc.getDisplayValue('number');
+			response.sys_id = grInc.getValue('sys_id');
+			response.state = grInc.getDisplayValue('state');
+			response.assignment_group = grInc.getDisplayValue('assignment_group');
+			response.status_code = '201';
+		} else {
+			response.transaction_status = 'Error';
+			response.status_code = '400';
+		}
+		return JSON.stringify(response);
+	},
+
+	updateLocalIncident: function(restBody) {
+		var body = JSON.parse(restBody);
+		var response = {};
+		var grImpSet = new GlideRecord('TABLE_NAME'); // need new import set table
+		grImpSet.initialize();
+		grImpSet.u_short_description = restBody.short_description;
+		grImpSet.u_priority = restBody.priority;
+		grImpSet.u_correlation_id = restBody.correlation_id;
+		grImpSet.u_assignment_group = restBody.assignment_group;
+		grImpSet.u_contact_type = restBody.contact_type;
+		grImpSet.u_configuration_item = restBody.configuration_item;
+		grImpSet.u_affected_date = restBody.affected_date; 
+		grImpSet.u_work_notes = restBody.work_notes;
+		var id = grImpSet.insert();
+		var grImpResult = new GlideRecord('TABLE_NAME'); // need new import set table
+		grImpResult.get(id);
+		var inc = grImpResult.sys_target_sys_id;
+		var grInc = new GlideRecord('incident');
+		grInc.addQuery('sys_id', inc);
+		grInc.query();
+		if (grInc.next()) {
+			response.transaction_status = 'success';
+			response.number = grInc.getDisplayValue('number');
+			response.sys_id = grInc.getValue('sys_id');
+			response.state = grInc.getDisplayValue('state');
+			response.assignment_group = grInc.getDisplayValue('assignment_group');
+			response.status_code = '200';
+		} else {
+			response.transaction_status = 'Error';
+			response.status_code = '400';
+		}
+		return JSON.stringify(response);
+	},
+
+	createRemoteIncident: function(incident_sys_id) {
+		var sm = new sn_ws.RESTMessageV2('eBond test','POST'); 
+		var grInc = new GlideRecord('incident');
+		grInc.get(incident_sys_id);
+		var payload = {
+			state: grInc.getValue('state'),
+			priority: grInc.getValue('priority'),
+			category: grInc.getDisplayValue('category'),
+			subcategory: grInc.getDisplayValue('subcategory'),
+			short_description: grInc.getDisplayValue('short_description'),
+			description: grInc.getDisplayValue('description'),
+			assignment_group: grInc.getDisplayValue('assignment_group'),
+			additional_comments: grInc.getDisplayValue('comments'),
+			work_notes: grInc.getDisplayValue('work_notes'),
+			correlation_id: grInc.getValue('number')
+		};
+		sm.setRequestBody(JSON.stringify(payload));
+		var response = sm.execute();
+		var statusCode = response.getStatusCode();
+		var responseBody = response.getBody();
+		var bodyParse = JSON.parse(responseBody);
+		if (statusCode == '201') {
+			grInc.correlation_id = bodyParse.result.correlation_id;
+			grInc.setWorkflow(false);
+			grInc.update();
+			gs.addInfoMessage('Incident (' + grInc.correlation_id + ') has been created in the FLuor Corporate ServiceNow instance');
+		} else {
+			var grIncNew = new GlideRecord("incident");
+			grIncNew.initialize();
+			grIncNew.short_description = 'An error occurred while attempting to CREATE an Incident in the remote IBM instance of ServiceNow';
+			grIncNew.description = 'An attempt was made to create a new remote Incident for ' + grInc.number + '\n\nThe response from the IBM instance was: ' + responseBody + '\nThe status code was: ' + statusCode;
+			grIncNew.caller_id = '6816f79cc0a8016401c5a33be04be441'; // 'admin'
+			grIncNew.assignment_group = 'aae3bb8c1bbe50108d44315e034bcb8e'; // servicenow admins
+			grIncNew.impact = 1;
+			grIncNew.urgency = 1;
+			grIncNew.insert();
+			gs.addErrorMessage('An error has occurred\nIncident ' + grIncNew.number + ' has been created in response to the error');
+		}
+	},
+
+	updateRemoteIncident: function(incident_sys_id, comm, note) {
+		if (comm == true) { var comment = this.getLatestComment(incident_sys_id); }
+		if (note == true) { var workNote = this.getLatestWorkNote(incident_sys_id); }
+		var sm = new sn_ws.RESTMessageV2('eBond test','POST'); 
+		var grInc = new GlideRecord('incident');
+		grInc.get(incident_sys_id);
+		var payload = {
+			servicenow_number: grInc.getValue('correlation_id'),
+			state: grInc.getValue('state'),
+			priority: grInc.getValue('priority'),
+			category: grInc.getDisplayValue('category'),
+			subcategory: grInc.getDisplayValue('subcategory'),
+			short_description: grInc.getDisplayValue('short_description'),
+			description: grInc.getDisplayValue('description'),
+			assignment_group: grInc.getDisplayValue('assignment_group'),
+			additional_comments: comment,
+			work_notes: workNote
+		};
+		sm.setRequestBody(JSON.stringify(payload));
+		var response = sm.execute();
+		var statusCode = response.getStatusCode();
+		var responseBody = response.getBody();
+		var bodyParse = JSON.parse(responseBody);
+		if (statusCode == '200') {
+			grInc.correlation_id = bodyParse.result.correlation_id;
+			grInc.setWorkflow(false);
+			grInc.update();
+			gs.addInfoMessage('Incident (' + grInc.correlation_id + ') has been updated in the Fluor Corporate ServiceNow instance');
+		} else {
+			var grIncNew = new GlideRecord("incident");
+			grIncNew.initialize();
+			grIncNew.short_description = 'An error occurred while attempting to CREATE an Incident in the remote IBM instance of ServiceNow';
+			grIncNew.description = 'An attempt was made to create a new remote Incident for ' + grInc.number + '\n\nThe response from the IBM instance was: ' + responseBody + '\nThe status code was: ' + statusCode;
+			grIncNew.caller_id = '6816f79cc0a8016401c5a33be04be441'; // 'admin'
+			grIncNew.assignment_group = 'aae3bb8c1bbe50108d44315e034bcb8e'; // servicenow admins
+			grIncNew.impact = 1;
+			grIncNew.urgency = 1;
+			grIncNew.insert();
+			gs.addErrorMessage('An error has occurred\nIncident ' + grIncNew.number + ' has been created in response to the error');
+		}
+	},
+
+	type: 'eBondUtils'
+};]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>sean.erickson@glidefast.com</sys_created_by>
+        <sys_created_on>2020-09-21 13:34:26</sys_created_on>
+        <sys_id>cccf310f1bdf1850d7e377761a4bcb06</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>eBondUtils</sys_name>
+        <sys_package display_value="SNeBond" source="x_flr_snebond">e14ffd8b1bdf1850d7e377761a4bcb69</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="SNeBond">e14ffd8b1bdf1850d7e377761a4bcb69</sys_scope>
+        <sys_update_name>sys_script_include_cccf310f1bdf1850d7e377761a4bcb06</sys_update_name>
+        <sys_updated_by>sean.erickson@glidefast.com</sys_updated_by>
+        <sys_updated_on>2020-09-24 22:09:55</sys_updated_on>
+    </sys_script_include>
+</record_update>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="oauth_entity">
+    <oauth_entity action="INSERT_OR_UPDATE">
+        <access>public</access>
+        <access_token_lifespan>1800</access_token_lifespan>
+        <active>true</active>
+        <auth_code_lifespan>60</auth_code_lifespan>
+        <auth_url/>
+        <certificate_url/>
+        <client_id>8e6d67eda3e3909077857c52acee7727</client_id>
+        <client_secret>rAvGmSR62pFgghabgr87BXsxpJr4TKMY</client_secret>
+        <client_uuid>4e6d67ed1be390908d44315e034bcb27</client_uuid>
+        <code_challenge_method>S256</code_challenge_method>
+        <comments/>
+        <default_grant_type>password</default_grant_type>
+        <id_token_lifespan>86400</id_token_lifespan>
+        <logo_url/>
+        <message_signature_lifespan>60</message_signature_lifespan>
+        <name>Inbound eBond - DEV</name>
+        <oauth_api_script/>
+        <protocol_name/>
+        <public_client>false</public_client>
+        <redirect_url>https://fluordev.service-now.com/oauth_redirect.do</redirect_url>
+        <refresh_token_lifespan>8640000</refresh_token_lifespan>
+        <refresh_token_url/>
+        <revoke_token_url/>
+        <salt/>
+        <send_client_credentials_as>request_body_parameter</send_client_credentials_as>
+        <skip_authorize>false</skip_authorize>
+        <sys_class_name>oauth_entity</sys_class_name>
+        <sys_created_by>sean.erickson@glidefast.com</sys_created_by>
+        <sys_created_on>2020-09-29 16:00:43</sys_created_on>
+        <sys_id>ce6d67ed1be390908d44315e034bcb27</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Inbound eBond - DEV</sys_name>
+        <sys_package display_value="SNeBond" source="x_flr_snebond">e14ffd8b1bdf1850d7e377761a4bcb69</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="SNeBond">e14ffd8b1bdf1850d7e377761a4bcb69</sys_scope>
+        <sys_update_name>oauth_entity_ce6d67ed1be390908d44315e034bcb27</sys_update_name>
+        <sys_updated_by>sean.erickson@glidefast.com</sys_updated_by>
+        <sys_updated_on>2020-09-29 16:00:43</sys_updated_on>
+        <token_url/>
+        <type>client</type>
+        <use_mutual_auth>false</use_mutual_auth>
+        <user/>
+    </oauth_entity>
+</record_update>

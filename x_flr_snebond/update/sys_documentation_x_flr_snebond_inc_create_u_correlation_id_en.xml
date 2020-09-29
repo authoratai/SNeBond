@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_documentation element="u_correlation_id" label="correlation_id" language="en" table="x_flr_snebond_inc_create">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>u_correlation_id</element>
+            <help/>
+            <hint/>
+            <label>correlation_id</label>
+            <language>en</language>
+            <name>x_flr_snebond_inc_create</name>
+            <plural>correlation_ids</plural>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>sean.erickson@glidefast.com</sys_created_by>
+            <sys_created_on>2020-09-24 22:34:11</sys_created_on>
+            <sys_id>4c4897c81babd850d7e377761a4bcbcc</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>correlation_id</sys_name>
+            <sys_package display_value="SNeBond" source="x_flr_snebond">e14ffd8b1bdf1850d7e377761a4bcb69</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="SNeBond">e14ffd8b1bdf1850d7e377761a4bcb69</sys_scope>
+            <sys_update_name>sys_documentation_x_flr_snebond_inc_create_u_correlation_id_en</sys_update_name>
+            <sys_updated_by>sean.erickson@glidefast.com</sys_updated_by>
+            <sys_updated_on>2020-09-24 22:34:11</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>
